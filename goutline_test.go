@@ -2,7 +2,6 @@ package goutline
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,33 +50,76 @@ func TestParseLine(t *testing.T) {
 	}
 }
 
-func TestOrganizeNodes(t *testing.T) {
+// func TestOrganizeNodes(t *testing.T) {
+// 	testCases := []struct {
+// 		desc        string
+// 		input       []*Node
+// 		returnError error
+// 		rootSize    int
+// 	}{
+// 		{
+// 			desc: "flat tree",
+// 			input: []*Node{
+// 				&Node{Content: "first node", NodeType: "star", Level: 1},
+// 				&Node{Content: "another first node", NodeType: "star", Level: 1},
+// 				&Node{Content: "yet another first node", NodeType: "star", Level: 1},
+// 			},
+// 			rootSize: 3,
+// 		},
+// 	}
+// 	for _, tC := range testCases {
+// 		t.Run(tC.desc, func(t *testing.T) {
+// 			root, err := OrganizeNodes(tC.input)
+// 			fmt.Printf("%#v\n", root)
+// 			if tC.returnError == nil {
+// 				assert.Nil(t, err)
+// 				assert.Equal(t, tC.rootSize, len(root.Children))
+// 			} else {
+// 				assert.Error(t, tC.returnError, err)
+// 			}
+// 		})
+// 	}
+// }
+
+func TestNodeStack(t *testing.T) {
 	testCases := []struct {
-		desc        string
-		input       []*Node
-		returnError error
-		rootSize    int
+		desc  string
+		nodes []*Node
 	}{
 		{
-			desc: "",
-			input: []*Node{
-				&Node{Content: "first node", NodeType: "star", Level: 1},
-				&Node{Content: "another first node", NodeType: "star", Level: 1},
-				&Node{Content: "yet another first node", NodeType: "star", Level: 1},
+			desc: "one node",
+			nodes: []*Node{
+				&Node{Level: 1, Content: "A"},
 			},
-			rootSize: 3,
+		},
+		{
+			desc: "two nodes",
+			nodes: []*Node{
+				&Node{Level: 1, Content: "A"},
+				&Node{Level: 1, Content: "B"},
+			},
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			root, err := OrganizeNodes(tC.input)
-			fmt.Printf("%#v\n", root)
-			if tC.returnError == nil {
-				assert.Nil(t, err)
-				assert.Equal(t, tC.rootSize, len(root.Children))
-			} else {
-				assert.Error(t, tC.returnError, err)
+			testStack := Stack{}
+			//test push results in right length of stack
+			for _, node := range tC.nodes {
+				testStack.Push(node)
 			}
+			assert.Equal(t, len(tC.nodes), testStack.Len())
+			//test stack order
+			for i, node := range tC.nodes {
+				assert.EqualValues(t, node, testStack.Stack[i])
+			}
+			//test pop order
+			counter := 0
+			for i := testStack.Len(); i > 0; i-- {
+				node := testStack.Pop()
+				assert.EqualValues(t, tC.nodes[i-1], node)
+				counter++
+			}
+			assert.Equal(t, len(tC.nodes), counter)
 		})
 	}
 }
